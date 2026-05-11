@@ -183,10 +183,6 @@ input, select{
     <div class="valor" id="completa">0</div>
   </div>
 
-  <div class="card">
-    <h2>EN PROCESO</h2>
-    <div class="valor" id="proceso">0</div>
-  </div>
 
   <div class="card">
     <h2>PENDIENTES</h2>
@@ -297,9 +293,6 @@ fetch(API + "?dashboardAvance=oq")
   document.getElementById("completa").textContent =
     data.completa;
 
-  document.getElementById("proceso").textContent =
-    data.proceso;
-
   document.getElementById("pendiente").textContent =
     data.pendiente;
 
@@ -394,19 +387,17 @@ function graficas(data){
 
       data:{
 
-        labels:[
-          'Completas',
-          'En proceso',
-          'Pendientes'
-        ],
+labels:[
+  'Completas',
+  'Pendientes'
+],
 
         datasets:[{
 
-          data:[
-            data.completa,
-            data.proceso,
-            data.pendiente
-          ]
+data:[
+  data.completa,
+  data.pendiente
+]
 
         }]
 
