@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Dashboard Avance OQ</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#0b2340;
+  color:#fff;
+  padding:20px;
+}
+
+.logoBox{
+  display:flex;
+  justify-content:center;
+  margin-bottom:20px;
+}
+
+.logoBox img{
+  max-width:260px;
+  width:100%;
+  background:#fff;
+  padding:12px;
+  border-radius:14px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+  margin-bottom:30px;
+}
+
+.card{
+  background:#fff;
+  color:#111;
+  border-radius:16px;
+  padding:20px;
+  text-align:center;
+  box-shadow:0 10px 20px rgba(0,0,0,.25);
+}
+
+.card h2{
+  margin:0;
+  font-size:16px;
+}
+
+.valor{
+  font-size:40px;
+  font-weight:bold;
+  margin-top:15px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin-bottom:25px;
+}
+
+.box{
+  background:#fff;
+  color:#111;
+  border-radius:16px;
+  padding:20px;
+}
+
+.chartBox{
+  position:relative;
+  min-height:420px;
+}
+
+canvas{
+  width:100%!important;
+  height:420px!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th, td{
+  border:1px solid #ddd;
+  padding:10px;
+  font-size:13px;
+  text-align:left;
+}
+
+th{
+  background:#0b2340;
+  color:#fff;
+}
+
+.badge{
+  padding:5px 10px;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+.COMPLETA{
+  background:#c8f7c5;
+}
+
+.PROCESO{
+  background:#fff3b0;
+}
+
+.PENDIENTE{
+  background:#ffc7c7;
+}
+
+.filters{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+  margin-bottom:15px;
+}
+
+input, select{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+@media(max-width:900px){
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  canvas{
+    height:520px!important;
+  }
+
+  .valor{
+    font-size:28px;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="logoBox">
+  <img src="logo.png" alt="CONFIPETROL">
+</div>
+
+<h1>DASHBOARD AVANCE OQ</h1>
+
+<div class="cards">
+
+  <div class="card">
+    <h2>% AVANCE</h2>
+    <div class="valor" id="avance">0%</div>
+  </div>
+
+  <div class="card">
+    <h2>TAREAS</h2>
+    <div class="valor" id="total">0</div>
+  </div>
+
+  <div class="card">
+    <h2>COMPLETAS</h2>
+    <div class="valor" id="completa">0</div>
+  </div>
+
+  <div class="card">
+    <h2>EN PROCESO</h2>
+    <div class="valor" id="proceso">0</div>
+  </div>
+
+  <div class="card">
+    <h2>PENDIENTES</h2>
+    <div class="valor" id="pendiente">0</div>
+  </div>
+
+</div>
+
+<div class="grid">
+
+  <div class="box">
+
+    <h3>Estado general OQ</h3>
+
+    <div class="chartBox">
+      <canvas id="graficaEstados"></canvas>
+    </div>
+
+  </div>
+
+  <div class="box">
+
+    <h3>Avance por prioridad</h3>
+
+    <div class="chartBox">
+      <canvas id="graficaPrioridad"></canvas>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="box">
+
+  <h3>Detalle de tareas OQ</h3>
+
+  <div class="filters">
+
+    <input
+      id="buscar"
+      placeholder="Buscar tarea..."
+      oninput="renderTabla()"
+    >
+
+    <select id="filtroEstado" onchange="renderTabla()">
+
+      <option value="">Todos los estados</option>
+      <option value="COMPLETA">Completa</option>
+      <option value="EN PROCESO">En proceso</option>
+      <option value="PENDIENTE">Pendiente</option>
+
+    </select>
+
+    <select id="filtroPrioridad" onchange="renderTabla()">
+
+      <option value="">Todas las prioridades</option>
+      <option value="1">Prioridad 1</option>
+      <option value="2">Prioridad 2</option>
+      <option value="3">Prioridad 3</option>
+
+    </select>
+
+  </div>
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>ID</th>
+        <th>TAREA</th>
+        <th>CLASIFICACION</th>
+        <th>PRIORIDAD</th>
+        <th>TECNICO</th>
+        <th>PROVEEDOR</th>
+        <th>CERTIFICADO</th>
+        <th>ESTADO</th>
+      </tr>
+
+    </thead>
+
+    <tbody id="tabla"></tbody>
+
+  </table>
+
+</div>
+
+<script>
+
+const API = "https://script.google.com/macros/s/AKfycbxbzO1J8Dl0v4_NZ624FL9U7i4uIZzFhztAft7eyOWyQoGdR59VCxlpjUwrmgbIkZcKYA/exec";
+
+let detallesGlobal = [];
+
+fetch(API + "?dashboardAvance=oq")
+
+.then(r => r.json())
+
+.then(data => {
+
+  detallesGlobal = data.detalles || [];
+
+  document.getElementById("avance").textContent =
+    data.porcentajeAvance + "%";
+
+  document.getElementById("total").textContent =
+    data.total;
+
+  document.getElementById("completa").textContent =
+    data.completa;
+
+  document.getElementById("proceso").textContent =
+    data.proceso;
+
+  document.getElementById("pendiente").textContent =
+    data.pendiente;
+
+  renderTabla();
+
+  graficas(data);
+
+})
+
+.catch(err => {
+
+  console.error(err);
+
+  alert("No fue posible cargar dashboard.");
+
+});
+
+function renderTabla(){
+
+  const buscar =
+    document.getElementById("buscar")
+    .value
+    .toLowerCase();
+
+  const estado =
+    document.getElementById("filtroEstado")
+    .value;
+
+  const prioridad =
+    document.getElementById("filtroPrioridad")
+    .value;
+
+  const tbody =
+    document.getElementById("tabla");
+
+  tbody.innerHTML = "";
+
+  const filtrados = detallesGlobal.filter(d => {
+
+    return (
+      (!buscar || d.tarea.toLowerCase().includes(buscar)) &&
+      (!estado || d.estado === estado) &&
+      (!prioridad || d.prioridad === prioridad)
+    );
+
+  });
+
+  filtrados.forEach(d => {
+
+    const clase =
+      d.estado === "EN PROCESO"
+      ? "PROCESO"
+      : d.estado;
+
+    const tr =
+      document.createElement("tr");
+
+    tr.innerHTML = `
+
+      <td>${d.idTarea}</td>
+      <td>${d.tarea}</td>
+      <td>${d.clasificacion}</td>
+      <td>${d.prioridad}</td>
+      <td>${d.tieneTecnico}</td>
+      <td>${d.tieneProveedor}</td>
+      <td>${d.tieneCertProveedor}</td>
+      <td>
+        <span class="badge ${clase}">
+          ${d.estado}
+        </span>
+      </td>
+
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+
+function graficas(data){
+
+  new Chart(
+    document.getElementById("graficaEstados"),
+    {
+
+      type:'doughnut',
+
+      data:{
+
+        labels:[
+          'Completas',
+          'En proceso',
+          'Pendientes'
+        ],
+
+        datasets:[{
+
+          data:[
+            data.completa,
+            data.proceso,
+            data.pendiente
+          ]
+
+        }]
+
+      }
+
+    }
+  );
+
+  new Chart(
+    document.getElementById("graficaPrioridad"),
+    {
+
+      type:'bar',
+
+      data:{
+
+        labels:
+          data.prioridades.map(
+            p => "Prioridad " + p.prioridad
+          ),
+
+        datasets:[{
+
+          label:'% avance',
+
+          data:
+            data.prioridades.map(
+              p => p.porcentaje
+            )
+
+        }]
+
+      },
+
+      options:{
+
+        responsive:true,
+
+        scales:{
+
+          y:{
+            beginAtZero:true,
+            max:100
+          }
+
+        }
+
+      }
+
+    }
+  );
+
+}
+
+</script>
+
+</body>
+</html>
