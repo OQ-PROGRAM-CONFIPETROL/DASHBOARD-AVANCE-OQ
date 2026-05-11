@@ -256,14 +256,9 @@ input, select{
     <thead>
 
       <tr>
-        <th>ID</th>
-        <th>TAREA</th>
-        <th>CLASIFICACION</th>
-        <th>PRIORIDAD</th>
-        <th>TECNICO</th>
-        <th>PROVEEDOR</th>
-        <th>CERTIFICADO</th>
-        <th>ESTADO</th>
+<th>PROVEEDOR</th>
+<th>CERTIFICADO</th>
+<th>ESTADO</th>
       </tr>
 
     </thead>
@@ -364,8 +359,12 @@ function renderTabla(){
       <td>${d.clasificacion}</td>
       <td>${d.prioridad}</td>
       <td>${d.tieneTecnico}</td>
-      <td>${d.tieneProveedor}</td>
-      <td>${d.tieneCertProveedor}</td>
+<td>${d.empresaProveedor || "—"}</td>
+<td>${
+  d.certificadoProveedor
+    ? `<a href="${d.certificadoProveedor}" target="_blank" rel="noopener noreferrer">Ver certificado</a>`
+    : "—"
+}</td>
       <td>
         <span class="badge ${clase}">
           ${d.estado}
