@@ -8,7 +8,7 @@
 <title>Dashboard Avance OQ</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
 
 body{
@@ -405,11 +405,11 @@ data:[
     }
   );
 
-  new Chart(
-    document.getElementById("graficaPrioridad"),
-    {
-
-      type:'bar',
+new Chart(
+  document.getElementById("graficaPrioridad"),
+  {
+    type:'bar',
+    plugins:[ChartDataLabels],
 
       data:{
 
@@ -431,24 +431,28 @@ data:[
 
       },
 
-      options:{
-
-        responsive:true,
-
-        scales:{
-
-          y:{
-            beginAtZero:true,
-            max:100
-          }
-
-        }
-
+options:{
+  responsive:true,
+  plugins:{
+    datalabels:{
+      anchor:'end',
+      align:'top',
+      formatter:function(value){
+        return value + "%";
+      },
+      font:{
+        weight:'bold',
+        size:14
       }
-
     }
-  );
-
+  },
+  scales:{
+    y:{
+      beginAtZero:true,
+      max:100
+    }
+  }
+}
 }
 
 </script>
