@@ -408,52 +408,68 @@ data:[
 new Chart(
   document.getElementById("graficaPrioridad"),
   {
+
     type:'bar',
+
     plugins:[ChartDataLabels],
 
-      data:{
+    data:{
 
-        labels:
+      labels:
+        data.prioridades.map(
+          p => "Prioridad " + p.prioridad
+        ),
+
+      datasets:[{
+
+        label:'% avance',
+
+        data:
           data.prioridades.map(
-            p => "Prioridad " + p.prioridad
-          ),
+            p => p.porcentaje
+          )
 
-        datasets:[{
+      }]
 
-          label:'% avance',
+    },
 
-          data:
-            data.prioridades.map(
-              p => p.porcentaje
-            )
+    options:{
 
-        }]
+      responsive:true,
+
+      plugins:{
+
+        datalabels:{
+
+          anchor:'end',
+          align:'top',
+
+          formatter:function(value){
+            return value + "%";
+          },
+
+          font:{
+            weight:'bold',
+            size:14
+          }
+
+        }
 
       },
 
-options:{
-  responsive:true,
-  plugins:{
-    datalabels:{
-      anchor:'end',
-      align:'top',
-      formatter:function(value){
-        return value + "%";
-      },
-      font:{
-        weight:'bold',
-        size:14
+      scales:{
+
+        y:{
+          beginAtZero:true,
+          max:100
+        }
+
       }
+
     }
-  },
-  scales:{
-    y:{
-      beginAtZero:true,
-      max:100
-    }
+
   }
-}
-}
+);
 
 </script>
 
